@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVE Details</title>
+</head>
+<body>
+    <h1>CVE Details: {{ cve_id }}</h1>
+    
+    <div>
+        <strong>Description:</strong>
+        <p>{{ description }}</p>
+    </div>
+    
+    <div>
+        <strong>Severity:</strong> {{ cvss_metrics.severity }}
+    </div>
+    
+    <div>
+        <strong>Vector String:</strong> {{ cvss_metrics.vector_string }}
+    </div>
+
+    <div>
+        <strong>Base Score:</strong> {{ cvss_metrics.base_score }}
+    </div>
+
+    <div>
+        <strong>Access Vector:</strong> {{ cvss_metrics.access_vector }}
+    </div>
+
+    <div>
+        <strong>Access Complexity:</strong> {{ cvss_metrics.access_complexity }}
+    </div>
+
+    <div>
+        <strong>Authentication:</strong> {{ cvss_metrics.authentication }}
+    </div>
+
+    <div>
+        <strong>Confidentiality Impact:</strong> {{ cvss_metrics.confidentiality_impact }}
+    </div>
+
+    <div>
+        <strong>Integrity Impact:</strong> {{ cvss_metrics.integrity_impact }}
+    </div>
+
+    <div>
+        <strong>Availability Impact:</strong> {{ cvss_metrics.availability_impact }}
+    </div>
+
+    <div>
+        <strong>Exploitability Score:</strong> {{ cvss_metrics.exploitability_score }}
+    </div>
+
+    <div>
+        <strong>Impact Score:</strong> {{ cvss_metrics.impact_score }}
+    </div>
+
+    <div>
+        <h3>References:</h3>
+        <ul>
+            {% for reference in references %}
+                <li><a href="{{ reference.url }}" target="_blank">{{ reference.source }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

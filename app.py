@@ -157,6 +157,63 @@ def get_cves():
     return render_template("index.html", cves=cves, total_records=total_records,
                            current_page=current_page, per_page=per_page, total_pages=total_pages)
 
+@app.route("/cves/<cve_id>")
+@app.route("/cves/<cve_id>")
+def get_cve_details(cve_id):
+    # Fetch the CVE document based on the cve_id
+    cve_document = cve_collection.find_one({"cve.id": cve_id}, {"_id": 0})
+    
+    if not cve_document:
+        return "CVE not found", 404  # Return 404 if the CVE doesn't exist
+    
+    # Extracting relevant fields from the MongoDB structure
+    cve_data = cve_document.get("cve", {})
+    
+    # Description
+    description = cve_data.get("descriptions", [{}])[0].get("value", "Description not available")
+    
+    # CVSS metrics (Primary CVSS Metric)
+    metrics = cve_data.get("metrics", {}).get("cvssMetricV2", [{}])[0].get("cvssData", {})
+    vector_string = metrics.get("vectorString", "Vector string not available")
+    base_score = metrics.get("baseScore", "Score not available")
+    
+    # Extract severity from the outer structure
+    severity = cve_data.get("metrics", {}).get("cvssMetricV2", [{}])[0].get("baseSeverity", "Severity not available")
+    
+    access_vector = metrics.get("accessVector", "Access Vector not available")
+    access_complexity = metrics.get("accessComplexity", "Access Complexity not available")
+    authentication = metrics.get("authentication", "Authentication not available")
+    confidentiality_impact = metrics.get("confidentialityImpact", "Confidentiality Impact not available")
+    integrity_impact = metrics.get("integrityImpact", "Integrity Impact not available")
+    availability_impact = metrics.get("availabilityImpact", "Availability Impact not available")
+    
+    exploitability_score = cve_data.get("metrics", {}).get("cvssMetricV2", [{}])[0].get("exploitabilityScore", "exploitabilty not available")
+    impact_score = cve_data.get("metrics", {}).get("cvssMetricV2", [{}])[0].get("impactScore", "impactscore not available")
+
+    # Create a dictionary to hold CVSS metrics
+    cvss_metrics = {
+        "severity": severity,
+        "vector_string": vector_string,
+        "base_score": base_score,
+        "access_vector": access_vector,
+        "access_complexity": access_complexity,
+        "authentication": authentication,
+        "confidentiality_impact": confidentiality_impact,
+        "integrity_impact": integrity_impact,
+        "availability_impact": availability_impact,
+        "exploitability_score": exploitability_score,
+        "impact_score": impact_score
+    }
+    
+    # Get references (URLs)
+    references = cve_data.get("references", [])
+
+    # Pass all the extracted information to the template, including cvss_metrics and references
+    return render_template("cve_detail.html", 
+                           cve_id=cve_id,
+                           description=description,
+                           cvss_metrics=cvss_metrics,
+                           references=references)
 
 
 if __name__ == "__main__":

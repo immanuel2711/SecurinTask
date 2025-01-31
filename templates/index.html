@@ -60,6 +60,12 @@
             text-align: center;
             margin-top: 10px;
         }
+        tr {
+            cursor: pointer; /* Make the row appear clickable */
+        }
+        tr:hover {
+            background-color: #e0e0e0; /* Change background color on hover */
+        }
     </style>
 </head>
 <body>
@@ -78,7 +84,7 @@
         </thead>
         <tbody>
             {% for cve in cves %}
-            <tr>
+            <tr onclick="window.location.href='/cves/{{ cve['cve_id'] }}'">
                 <td>{{ cve['cve_id'] }}</td>
                 <td>{{ cve['source_identifier'] }}</td>
                 <td>{{ cve['published'] }}</td>
