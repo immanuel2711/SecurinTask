@@ -4,66 +4,156 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CVE Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+            margin: 30px;
+            font-size: 1em;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .section-headings {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .cvss-metrics, .scores, .impact-metrics, .cpe {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 1em;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 10px;
+        }
+
+        .cvss-metrics, .scores, .impact-metrics, .cpe {
+            margin-left: 20px;
+            margin-right: 20px;
+        }
+
+        .cpe h3 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .description p {
+            font-size: 1.1em;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        .scores h1 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+    </style>
 </head>
 <body>
+
     <h1>CVE Details: {{ cve_id }}</h1>
     
-    <div>
+    <div class="description">
         <strong>Description:</strong>
         <p>{{ description }}</p>
     </div>
+
+    <div class="section-headings">
+        <span>CVSS2 Metrics</span>
+    </div>
+
+    <div class="cvss-metrics">
+        <div>
+            <strong>Severity:</strong> {{ cvss_metrics.severity }}
+        </div>
+
+        <div>
+            <strong>Base Score:</strong> {{ cvss_metrics.base_score }}
+        </div>
+
+        <div>
+            <strong>Vector String:</strong> {{ cvss_metrics.vector_string }}
+        </div>
+    </div>
+
+    <div class="impact-metrics">
+        <table>
+            <tr>
+                <th>Access Vector</th>
+                <th>Access Complexity</th>
+                <th>Authentication</th>
+                <th>Confidentiality Impact</th>
+                <th>Integrity Impact</th>
+            </tr>
+            <tr>
+                <td>{{ cvss_metrics.access_vector }}</td>
+                <td>{{ cvss_metrics.access_complexity }}</td>
+                <td>{{ cvss_metrics.authentication }}</td>
+                <td>{{ cvss_metrics.confidentiality_impact }}</td>
+                <td>{{ cvss_metrics.integrity_impact }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="scores">
+        <h1>Scores:</h1>
+        <div>
+            <strong>Exploitability Score:</strong> {{ cvss_metrics.exploitability_score }}
+        </div>
+
+        <div>
+            <strong>Impact Score:</strong> {{ cvss_metrics.impact_score }}
+        </div>
+    </div>
+
+    <div class="cpe">
+        <h3>CPE</h3>
+        <table>
+            <tr>
+                <th>Criteria</th>
+                <th>Match Criteria ID</th>
+                <th>Vulnerable</th>
+            </tr>
+            <tr>
+                <td>{{ cpe_criteria }}</td>
+                <td>{{ match_criteria_id }}</td>
+                <td>{{ vulnerable }}</td>
+            </tr>
+        </table>
+    </div>
     
-    <div>
-        <strong>Severity:</strong> {{ cvss_metrics.severity }}
-    </div>
-    
-    <div>
-        <strong>Vector String:</strong> {{ cvss_metrics.vector_string }}
-    </div>
 
-    <div>
-        <strong>Base Score:</strong> {{ cvss_metrics.base_score }}
-    </div>
-
-    <div>
-        <strong>Access Vector:</strong> {{ cvss_metrics.access_vector }}
-    </div>
-
-    <div>
-        <strong>Access Complexity:</strong> {{ cvss_metrics.access_complexity }}
-    </div>
-
-    <div>
-        <strong>Authentication:</strong> {{ cvss_metrics.authentication }}
-    </div>
-
-    <div>
-        <strong>Confidentiality Impact:</strong> {{ cvss_metrics.confidentiality_impact }}
-    </div>
-
-    <div>
-        <strong>Integrity Impact:</strong> {{ cvss_metrics.integrity_impact }}
-    </div>
-
-    <div>
-        <strong>Availability Impact:</strong> {{ cvss_metrics.availability_impact }}
-    </div>
-
-    <div>
-        <strong>Exploitability Score:</strong> {{ cvss_metrics.exploitability_score }}
-    </div>
-
-    <div>
-        <strong>Impact Score:</strong> {{ cvss_metrics.impact_score }}
-    </div>
-
-    <div>
-        <h3>References:</h3>
-        <ul>
-            {% for reference in references %}
-                <li><a href="{{ reference.url }}" target="_blank">{{ reference.source }}</a></li>
-            {% endfor %}
-        </ul>
-    </div>
 </body>
 </html>

@@ -187,9 +187,14 @@ def get_cve_details(cve_id):
     integrity_impact = metrics.get("integrityImpact", "Integrity Impact not available")
     availability_impact = metrics.get("availabilityImpact", "Availability Impact not available")
     
-    exploitability_score = cve_data.get("metrics", {}).get("cvssMetricV2", [{}])[0].get("exploitabilityScore", "exploitabilty not available")
-    impact_score = cve_data.get("metrics", {}).get("cvssMetricV2", [{}])[0].get("impactScore", "impactscore not available")
-
+    exploitability_score = cve_data.get("metrics", {}).get("cvssMetricV2", [{}])[0].get("exploitabilityScore", "Exploitability score not available")
+    impact_score = cve_data.get("metrics", {}).get("cvssMetricV2", [{}])[0].get("impactScore", "Impact score not available")
+    
+    # Extract CPE criteria, matchCriteriaId, and vulnerability status
+    cpe_criteria = cve_data.get("configurations", [{}])[0].get("nodes", [{}])[0].get("cpeMatch", [{}])[0].get("criteria", "Criteria not available")
+    match_criteria_id = cve_data.get("configurations", [{}])[0].get("nodes", [{}])[0].get("cpeMatch", [{}])[0].get("matchCriteriaId", "Match Criteria ID not available")
+    vulnerable = cve_data.get("configurations", [{}])[0].get("nodes", [{}])[0].get("cpeMatch", [{}])[0].get("vulnerable", "Vulnerable not available")
+    
     # Create a dictionary to hold CVSS metrics
     cvss_metrics = {
         "severity": severity,
@@ -204,17 +209,15 @@ def get_cve_details(cve_id):
         "exploitability_score": exploitability_score,
         "impact_score": impact_score
     }
-    
-    # Get references (URLs)
-    references = cve_data.get("references", [])
 
-    # Pass all the extracted information to the template, including cvss_metrics and references
+    # Pass all the extracted information to the template, including cvss_metrics, references, and CPE data
     return render_template("cve_detail.html", 
                            cve_id=cve_id,
                            description=description,
                            cvss_metrics=cvss_metrics,
-                           references=references)
-
+                           cpe_criteria=cpe_criteria,
+                           match_criteria_id=match_criteria_id,
+                           vulnerable=vulnerable)
 
 if __name__ == "__main__":
     schedule_cve_sync()  # Start the scheduler
