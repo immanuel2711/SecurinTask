@@ -118,12 +118,7 @@ def fetch_cves():
     fetch_and_store_cves(last_modified_date)
     return {"message": "CVE data fetched and stored successfully."}
 
-@app.route("/cves/list")
 
-
-
-
-@app.route("/cves/list")
 @app.route("/cves/list")
 def get_cves():
     # Get the current page and the number of items per page from the query parameters
@@ -157,7 +152,7 @@ def get_cves():
     return render_template("index.html", cves=cves, total_records=total_records,
                            current_page=current_page, per_page=per_page, total_pages=total_pages)
 
-@app.route("/cves/<cve_id>")
+
 @app.route("/cves/<cve_id>")
 def get_cve_details(cve_id):
     # Fetch the CVE document based on the cve_id

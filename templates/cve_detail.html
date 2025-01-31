@@ -31,8 +31,17 @@
             margin-bottom: 25px;
         }
 
-        .cvss-metrics, .scores, .impact-metrics, .cpe {
+        .cvss-metrics, .scores, .impact-metrics {
             margin-top: 20px;
+            margin-left: 20px;
+        }
+        .scores{
+            margin-left: 5px;
+        }
+
+        .cpe {
+            margin-top: 20px;
+            margin-left: 5px; /* Adjusted for better left alignment */
         }
 
         table {
@@ -55,11 +64,6 @@
 
         td {
             padding: 10px;
-        }
-
-        .cvss-metrics, .scores, .impact-metrics, .cpe {
-            margin-left: 20px;
-            margin-right: 20px;
         }
 
         .cpe h3 {
@@ -91,7 +95,7 @@
     </div>
 
     <div class="section-headings">
-        <span>CVSS2 Metrics</span>
+        <span>CVSS2 Metrics:</span>
     </div>
 
     <div class="cvss-metrics">
@@ -153,7 +157,6 @@
             </tr>
         </table>
     </div>
-    
 
 </body>
 </html>

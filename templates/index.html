@@ -25,7 +25,7 @@
             text-align: left;
         }
         th {
-            background-color: #007bff;
+            background-color: grey;
             color: white;
         }
         tr:nth-child(even) {
@@ -39,13 +39,13 @@
         .pagination a {
             margin: 0 10px;
             padding: 8px 16px;
-            background-color: #007bff;
+            background-color: green;
             color: white;
             text-decoration: none;
             border-radius: 5px;
         }
         .pagination a.disabled {
-            background-color: #ddd;
+            background-color: grey;
             pointer-events: none;
         }
         .pagination a.arrow {
@@ -69,8 +69,8 @@
     </style>
 </head>
 <body>
-
-    <h1>Total CVE Records: {{ total_records }}</h1>
+    <h1>CVE LIST</h1>
+    <h3 style="text-align: left;">Total CVE Records: {{ total_records }}</h3>
 
     <table>
         <thead>
