@@ -3,7 +3,7 @@ import requests
 from pymongo import MongoClient, UpdateOne
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
-
+from flask import request, render_template
 app = Flask(__name__)
 
 # MongoDB setup
@@ -17,10 +17,19 @@ RESULTS_PER_PAGE = 200  # Max limit per request
 
 # Helper function to validate and clean date fields (only return date without time)
 def clean_date(date_str):
+    if not date_str:
+        return "Unknown"
+    
     try:
-        # Extract only the date in 'YYYY-MM-DD' format (without time)
+        # Try to parse the date in the expected format
         return datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f").date().isoformat()
-    except (ValueError, TypeError):
+    except ValueError:
+        # Log the problematic date string for debugging
+        print(f"Error parsing date: {date_str}")
+        return "Unknown"
+    except TypeError:
+        # Handle None or incorrect data types
+        print(f"Invalid data type for date: {date_str}")
         return "Unknown"
 
 # Function to fetch CVEs based on modified date
@@ -110,8 +119,23 @@ def fetch_cves():
     return {"message": "CVE data fetched and stored successfully."}
 
 @app.route("/cves/list")
+
+
+
+
+@app.route("/cves/list")
+@app.route("/cves/list")
 def get_cves():
-    cves = list(cve_collection.find({}, {"_id": 0}))  # Get all documents, excluding _id
+    # Get the current page and the number of items per page from the query parameters
+    current_page = int(request.args.get('page', 1))  # Default to page 1 if no 'page' parameter
+    per_page = int(request.args.get('per_page', 10))  # Default to 10 results per page if 'per_page' is not set
+
+    # Calculate the skip and limit values for pagination
+    skip = (current_page - 1) * per_page
+
+    # Get the CVEs with pagination (skip and limit)
+    cves = list(cve_collection.find({}, {"_id": 0}).skip(skip).limit(per_page))
+
     # Flatten the 'cve' field for each record
     for cve in cves:
         cve_data = cve.get('cve', {})
@@ -122,11 +146,18 @@ def get_cves():
         cve['status'] = cve_data.get('vulnStatus', 'Unknown')
 
         # Clean dates before displaying
-        cve['published'] = clean_date(cve['published'])
-        cve['last_modified'] = clean_date(cve['last_modified'])
-        
-    total_records = len(cves)
-    return render_template("index.html", cves=cves, total_records=total_records)
+        cve['published'] = clean_date(cve['published'])  # Pass the date string here
+        cve['last_modified'] = clean_date(cve['last_modified'])  # Pass the date string here
+
+    # Calculate the total number of records in the collection for pagination
+    total_records = cve_collection.count_documents({})  # Get the total count of documents
+    total_pages = (total_records + per_page - 1) // per_page  # Calculate total pages (ceiling division)
+
+    # Pass the data to the template
+    return render_template("index.html", cves=cves, total_records=total_records,
+                           current_page=current_page, per_page=per_page, total_pages=total_pages)
+
+
 
 if __name__ == "__main__":
     schedule_cve_sync()  # Start the scheduler

@@ -31,11 +31,37 @@
         tr:nth-child(even) {
             background-color: #f2f2f2;
         }
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .pagination a {
+            margin: 0 10px;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .pagination a.disabled {
+            background-color: #ddd;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
 
     <h1>Total CVE Records: {{ total_records }}</h1>
+
+    <!-- Pagination Controls (Dropdown and Page Navigation) -->
+    <form method="GET" action="/cves/list">
+        <label for="per_page">Results per page:</label>
+        <select name="per_page" id="per_page" onchange="this.form.submit()">
+            <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+            <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+            <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+        </select>
+    </form>
 
     <table>
         <thead>
@@ -59,6 +85,13 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <!-- Pagination Links -->
+    <div class="pagination">
+        <a href="/cves/list?page={{ current_page - 1 }}&per_page={{ per_page }}" 
+           class="{% if current_page == 1 %}disabled{% endif %}">Previous</a>
+        <a href="/cves/list?page={{ current_page + 1 }}&per_page={{ per_page }}">Next</a>
+    </div>
 
 </body>
 </html>
