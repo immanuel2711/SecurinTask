@@ -15,10 +15,11 @@ cve_collection = db["cve_data"]
 NVD_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 RESULTS_PER_PAGE = 200  # Max limit per request
 
-# Helper function to validate and clean date fields
+# Helper function to validate and clean date fields (only return date without time)
 def clean_date(date_str):
     try:
-        return datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f").isoformat()
+        # Extract only the date in 'YYYY-MM-DD' format (without time)
+        return datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f").date().isoformat()
     except (ValueError, TypeError):
         return "Unknown"
 
@@ -108,7 +109,7 @@ def fetch_cves():
     fetch_and_store_cves(last_modified_date)
     return {"message": "CVE data fetched and stored successfully."}
 
-@app.route("/")
+@app.route("/cves/list")
 def get_cves():
     cves = list(cve_collection.find({}, {"_id": 0}))  # Get all documents, excluding _id
     # Flatten the 'cve' field for each record
@@ -119,6 +120,11 @@ def get_cves():
         cve['published'] = cve_data.get('published', 'Unknown')
         cve['last_modified'] = cve_data.get('lastModified', 'Unknown')
         cve['status'] = cve_data.get('vulnStatus', 'Unknown')
+
+        # Clean dates before displaying
+        cve['published'] = clean_date(cve['published'])
+        cve['last_modified'] = clean_date(cve['last_modified'])
+        
     total_records = len(cves)
     return render_template("index.html", cves=cves, total_records=total_records)
 
