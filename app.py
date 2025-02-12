@@ -4,6 +4,7 @@ from pymongo import MongoClient, UpdateOne
 from apscheduler.schedulers.background import BackgroundScheduler 
 from datetime import datetime
 from flask import request, render_template
+import pymongo
 app = Flask(__name__)
 
 # setting up mongo
@@ -138,20 +139,20 @@ def get_cves():
         cve_data = cve.get('cve', {})
         cve['cve_id'] = cve_data.get('id', 'Unknown')
         cve['source_identifier'] = cve_data.get('sourceIdentifier', 'Unknown')
-        cve['published'] = cve_data.get('published', 'Unknown')
-        cve['last_modified'] = cve_data.get('lastModified', 'Unknown')
+        cve['published'] = clean_date(cve_data.get('published', 'Unknown'))
+        cve['last_modified'] = clean_date(cve_data.get('lastModified', 'Unknown'))
         cve['status'] = cve_data.get('vulnStatus', 'Unknown')
-
-        # Cleanse dates before displaying
-        cve['published'] = clean_date(cve['published'])  
-        cve['last_modified'] = clean_date(cve['last_modified'])  
 
     total_records = cve_collection.count_documents({})  # Get the total count of documents
     total_pages = (total_records + per_page - 1) // per_page  
 
-    return render_template("index.html", cves=cves, total_records=total_records,
-                           current_page=current_page, per_page=per_page, total_pages=total_pages)
-
+    return render_template("index.html", 
+                           cves=cves, 
+                           total_records=total_records,
+                           current_page=current_page, 
+                           per_page=per_page, 
+                           total_pages=total_pages,
+                           min=min)  # Pass min ex
 
 
 @app.route("/cves/<cve_id>")
