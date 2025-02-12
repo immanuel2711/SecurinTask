@@ -101,7 +101,7 @@ def get_last_modified_date():
     last_cve = cve_collection.find_one({}, sort=[("last_modified", -1)])
     return last_cve["last_modified"] if last_cve else None
 
-#sync data periodically using apscheduler
+#scheduler logic
 def schedule_cve_sync():
     scheduler = BackgroundScheduler()
 
@@ -121,20 +121,18 @@ def fetch_cves():
 #sorted by ascending order
 @app.route("/cves/list")
 def get_cves():
-    # Get the current page and the number of items per page from the query parameters
-    current_page = int(request.args.get('page', 1))  # Default to the first page
-    per_page = int(request.args.get('per_page', 10))  # Default to 10 results per page if 'per_page' is not set
-    
-    # Pagination code
+    current_page = int(request.args.get('page', 1))  
+    per_page = int(request.args.get('per_page', 10))  
+   
     skip = (current_page - 1) * per_page
 
-    # Query to fetch CVEs, with sorting in ascending order by published date
+   
     cves = list(cve_collection.find({}, {"_id": 0})
-                     .sort("published", pymongo.ASCENDING)  # Ascending sort by published date
-                     .skip(skip)
-                     .limit(per_page))
+                .sort("published", pymongo.ASCENDING)
+                .skip(skip)
+                .limit(per_page))
 
-    # Clean dates before displaying
+   
     for cve in cves:
         cve_data = cve.get('cve', {})
         cve['cve_id'] = cve_data.get('id', 'Unknown')
@@ -143,8 +141,13 @@ def get_cves():
         cve['last_modified'] = clean_date(cve_data.get('lastModified', 'Unknown'))
         cve['status'] = cve_data.get('vulnStatus', 'Unknown')
 
-    total_records = cve_collection.count_documents({})  # Get the total count of documents
+   
+    total_records = cve_collection.count_documents({})
     total_pages = (total_records + per_page - 1) // per_page  
+
+    
+    start_page = max(1, current_page - 2)
+    end_page = min(total_pages, current_page + 2)
 
     return render_template("index.html", 
                            cves=cves, 
@@ -152,7 +155,9 @@ def get_cves():
                            current_page=current_page, 
                            per_page=per_page, 
                            total_pages=total_pages,
-                           min=min)  # Pass min ex
+                           start_page=start_page, 
+                           end_page=end_page,
+                           min=min,max=max)  
 
 
 @app.route("/cves/<cve_id>")
@@ -161,7 +166,7 @@ def get_cve_details(cve_id):
     cve_document = cve_collection.find_one({"cve.id": cve_id}, {"_id": 0})
     
     if not cve_document:
-        return "CVE not found", 404  # Return 404 if the CVE doesn't exist
+        return "CVE not found", 404  
     
     # Extracting relevant fields from the MongoDB structure
     cve_data = cve_document.get("cve", {})
@@ -187,12 +192,12 @@ def get_cve_details(cve_id):
     exploitability_score = cve_data.get("metrics", {}).get("cvssMetricV2", [{}])[0].get("exploitabilityScore", "Exploitability score not available")
     impact_score = cve_data.get("metrics", {}).get("cvssMetricV2", [{}])[0].get("impactScore", "Impact score not available")
     
-    # Extract CPE criteria, matchCriteriaId, and vulnerability status
+    
     cpe_criteria = cve_data.get("configurations", [{}])[0].get("nodes", [{}])[0].get("cpeMatch", [{}])[0].get("criteria", "Criteria not available")
     match_criteria_id = cve_data.get("configurations", [{}])[0].get("nodes", [{}])[0].get("cpeMatch", [{}])[0].get("matchCriteriaId", "Match Criteria ID not available")
     vulnerable = cve_data.get("configurations", [{}])[0].get("nodes", [{}])[0].get("cpeMatch", [{}])[0].get("vulnerable", "Vulnerable not available")
     
-    # Create a dictionary to hold CVSS metrics
+   
     cvss_metrics = {
         "severity": severity,
         "vector_string": vector_string,
@@ -207,7 +212,7 @@ def get_cve_details(cve_id):
         "impact_score": impact_score
     }
 
-    # Pass all the extracted information to the template, including cvss_metrics, references, and CPE data
+    
     return render_template("cve_detail.html", 
                            cve_id=cve_id,
                            description=description,
@@ -217,5 +222,5 @@ def get_cve_details(cve_id):
                            vulnerable=vulnerable)
 
 if __name__ == "__main__":
-    schedule_cve_sync()  # Start the scheduler
+    schedule_cve_sync()  # scheduler start code
     app.run(debug=True)
